@@ -1,7 +1,15 @@
-// Wrap all code that interacts with the DOM in a call to jQuery to ensure that
-// the code isn't run until the browser has finished rendering all the elements
-// in the html.
+//Use advance format plugin to display date
+dayjs.extend(window.dayjs_plugin_advancedFormat)
+//initialize empty local storage list
+var hourList = [];
+
 $(function () {
+
+  var currentDay = $("#currentDay");
+  $(currentDay).text(dayjs().format("dddd, MMM Do, YYYY"));
+  var listContainer = $("#hour-list")
+
+  listContainer.on("click", saveRecord);
   // TODO: Add a listener for click events on the save button. This code should
   // use the id in the containing time-block as a key to save the user input in
   // local storage. HINT: What does `this` reference in the click listener
@@ -21,3 +29,47 @@ $(function () {
   //
   // TODO: Add code to display the current date in the header of the page.
 });
+
+function checkLocalHourList() {
+  if (localStorage.hasOwnProperty("hourList")) {
+    return hourList = JSON.parse(localStorage.getItem("hourList"));
+  }
+  else {
+    return hourList = [];
+  }
+}
+
+function saveRecord(event) {
+  event.preventDefault();
+  if (event.target.matches("i")) {
+    let hourId = $(event.target).parent().parent("div").attr("id");
+    let userRecord = $(event.target).parent().siblings("textarea").val();
+
+    //console.log(record);
+    //console.log(hourRecord);
+    //console.log(userRecord);
+
+    if (userRecord != null && userRecord != "") {
+      let userEvent = {
+        hour: hourId,
+        event: userRecord
+      }
+      checkLocalHourList();
+
+      let findRecordIndex = hourList.findIndex((record) => record.hour === hourId);
+      if (findRecordIndex == -1) {
+        hourList.push(userEvent);
+      } else {
+        hourList[findRecordIndex]["event"] = userRecord;
+      }
+
+      localStorage.setItem("hourList", JSON.stringify(hourList));
+    }
+  }
+}
+
+function displayRecord() {
+  checkLocalHourList();
+  
+
+}
