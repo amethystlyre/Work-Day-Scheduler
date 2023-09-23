@@ -3,13 +3,19 @@ dayjs.extend(window.dayjs_plugin_advancedFormat)
 //initialize empty local storage list
 var hourList = [];
 
-$(function () {
 
+$(function () {
+  displayRecord();
   var currentDay = $("#currentDay");
-  $(currentDay).text(dayjs().format("dddd, MMM Do, YYYY"));
-  var listContainer = $("#hour-list")
+  currentDay.text(dayjs().format("dddd, MMM Do, YYYY"));
+  var listContainer = $("#hour-list");
 
   listContainer.on("click", saveRecord);
+
+  var alertDisplay = $(".alert");
+  alertDisplay.hide();
+
+
   // TODO: Add a listener for click events on the save button. This code should
   // use the id in the containing time-block as a key to save the user input in
   // local storage. HINT: What does `this` reference in the click listener
@@ -60,16 +66,24 @@ function saveRecord(event) {
       if (findRecordIndex == -1) {
         hourList.push(userEvent);
       } else {
-        hourList[findRecordIndex]["event"] = userRecord;
+        hourList[findRecordIndex].event = userRecord;
       }
 
       localStorage.setItem("hourList", JSON.stringify(hourList));
+      $(".alert").fadeIn().delay(5000).fadeOut();
     }
   }
+  displayRecord();
 }
 
 function displayRecord() {
   checkLocalHourList();
-  
 
+  for(let i in hourList){
+    let recordID = "#"+hourList[i].hour;
+    //console.log(recordID);
+    $(recordID).children("textarea").val(hourList[i].event);
+  }
 }
+
+
