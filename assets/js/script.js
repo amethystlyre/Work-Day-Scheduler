@@ -1,89 +1,108 @@
-//Use advance format plugin to display date
-dayjs.extend(window.dayjs_plugin_advancedFormat)
-//initialize empty local storage list
-var hourList = [];
-
-
 $(function () {
+  //Use advance format plugin to display date
+  dayjs.extend(window.dayjs_plugin_advancedFormat)
+  //initialize empty local storage list
+  var hourList = [];
+  //display schedule from previous local records
   displayRecord();
-  var currentDay = $("#currentDay");
-  currentDay.text(dayjs().format("dddd, MMM Do, YYYY"));
-  var listContainer = $("#hour-list");
 
-  listContainer.on("click", saveRecord);
+  //Get today's date information using dayjs
+  var today = $("#currentDay");
+  today.text(dayjs().format("dddd, MMM Do, YYYY"));
+  
+  //Get current time information using dayjs
+  var timeContainer = $("#hour-list");
+  timeContainer.on("click", saveRecord);
+  //update background color based on current time
+  updateTimeColor();
 
+  //get the delement to display alert banner
   var alertDisplay = $(".alert");
-  alertDisplay.hide();
 
-
-  // TODO: Add a listener for click events on the save button. This code should
-  // use the id in the containing time-block as a key to save the user input in
-  // local storage. HINT: What does `this` reference in the click listener
-  // function? How can DOM traversal be used to get the "hour-x" id of the
-  // time-block containing the button that was clicked? How might the id be
-  // useful when saving the description in local storage?
-  //
-  // TODO: Add code to apply the past, present, or future class to each time
-  // block by comparing the id to the current hour. HINTS: How can the id
-  // attribute of each time-block be used to conditionally add or remove the
-  // past, present, and future classes? How can Day.js be used to get the
-  // current hour in 24-hour time?
-  //
-  // TODO: Add code to get any user input that was saved in localStorage and set
-  // the values of the corresponding textarea elements. HINT: How can the id
-  // attribute of each time-block be used to do this?
-  //
-  // TODO: Add code to display the current date in the header of the page.
-});
-
-function checkLocalHourList() {
-  if (localStorage.hasOwnProperty("hourList")) {
-    return hourList = JSON.parse(localStorage.getItem("hourList"));
-  }
-  else {
-    return hourList = [];
-  }
-}
-
-function saveRecord(event) {
-  event.preventDefault();
-  if (event.target.matches("i")) {
-    let hourId = $(event.target).parent().parent("div").attr("id");
-    let userRecord = $(event.target).parent().siblings("textarea").val();
-
-    //console.log(record);
-    //console.log(hourRecord);
-    //console.log(userRecord);
-
-    if (userRecord != null && userRecord != "") {
-      let userEvent = {
-        hour: hourId,
-        event: userRecord
-      }
-      checkLocalHourList();
-
-      let findRecordIndex = hourList.findIndex((record) => record.hour === hourId);
-      if (findRecordIndex == -1) {
-        hourList.push(userEvent);
-      } else {
-        hourList[findRecordIndex].event = userRecord;
-      }
-
-      localStorage.setItem("hourList", JSON.stringify(hourList));
-      $(".alert").fadeIn().delay(5000).fadeOut();
+  //check local storage for previous saved records
+  function checkLocalHourList() {
+    if (localStorage.hasOwnProperty("hourList")) {
+      return hourList = JSON.parse(localStorage.getItem("hourList"));
+    }
+    else {
+      return hourList = [];
     }
   }
-  displayRecord();
-}
 
-function displayRecord() {
-  checkLocalHourList();
+  //Update time events in scheduler
+  function saveRecord(event) {
+    event.preventDefault();
+    if (event.target.matches("i")) {
+      let hourId = $(event.target).parent().parent("div").attr("id");
+      let userRecord = $(event.target).parent().siblings("textarea").val();
 
-  for(let i in hourList){
-    let recordID = "#"+hourList[i].hour;
-    //console.log(recordID);
-    $(recordID).children("textarea").val(hourList[i].event);
+      //appointment added or updated
+      if (userRecord != null && userRecord != "") {
+        updateLocalHourList(hourId,userRecord);
+        updateAlertMsg("Appointment added to ");
+        alertDisplay.fadeIn().delay(5000).fadeOut();
+      }
+      //appointment cleared
+      else{
+        updateLocalHourList(hourId,userRecord);
+        updateAlertMsg("Appointment removed from ");
+        alertDisplay.fadeIn().delay(5000).fadeOut();
+      }
+    }
+    displayRecord();
   }
-}
 
+  //render events on work day schedule
+  function displayRecord() {
+    checkLocalHourList();
+
+    for (let i in hourList) {
+      let recordId = "#" + hourList[i].hour;
+      $(recordId).children("textarea").val(hourList[i].event);
+    }
+  }
+
+  //update color for past, present and future time blocks
+  function updateTimeColor() {
+    let currentTime = dayjs().hour();
+    if (currentTime < 9) {
+      timeContainer.children().addClass("future");
+    } else if (currentTime > 17) {
+      timeContainer.children().addClass("past");
+    }
+    else {
+      let timeId = "#hour-" + currentTime.toString();
+      $(timeId).addClass("present");
+      $(timeId).prevAll().addClass("past");
+      $(timeId).nextAll().addClass("future");
+    }
+  }
+
+  //update data stored in local storage
+  function updateLocalHourList(hourId,userRecord){
+    let userEvent = {
+      hour: hourId,
+      event: userRecord
+    }
+    checkLocalHourList();
+
+    //check if hour ID already exists in storage list
+    //if hour ID already exists, then update existing userEvent object
+    //if hour ID doesn't exist then add a new userEvent object to the list
+    let findRecordIndex = hourList.findIndex((record) => record.hour === hourId);
+    if (findRecordIndex == -1) {
+      hourList.push(userEvent);
+    } else {
+      hourList[findRecordIndex].event = userRecord;
+    }
+    localStorage.setItem("hourList", JSON.stringify(hourList));
+  }
+  
+  //a helper function for updating alert text message
+  function updateAlertMsg(msg){
+      let alert = $("#alert-text");
+      alert.text(msg);
+  }
+
+});
 

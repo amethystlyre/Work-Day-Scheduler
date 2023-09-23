@@ -3,6 +3,14 @@ body {
   font-size: 16px;
 }
 
+.alert {
+  display: none;
+}
+
+.alert p {
+  display: inline;
+}
+
 textarea {
   background: transparent;
   border: none;
