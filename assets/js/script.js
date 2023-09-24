@@ -6,20 +6,21 @@ $(function () {
   //display schedule from previous local records
   displayRecord();
 
-  //Get today's date information using dayjs
+  //Get today's date information using dayjs and display in header
   var today = $("#currentDay");
   today.text(dayjs().format("dddd, MMM Do, YYYY"));
   
   //Get current time information using dayjs
   var timeContainer = $("#hour-list");
   timeContainer.on("click", saveRecord);
+
   //update background color based on current time
   updateTimeColor();
 
   //get the delement to display alert banner
   var alertDisplay = $(".alert");
 
-  //check local storage for previous saved records
+  //function for checking local storage for previous saved records
   function checkLocalHourList() {
     if (localStorage.hasOwnProperty("hourList")) {
       return hourList = JSON.parse(localStorage.getItem("hourList"));
@@ -42,7 +43,7 @@ $(function () {
         updateAlertMsg("Appointment added to ");
         alertDisplay.fadeIn().delay(5000).fadeOut();
       }
-      //appointment cleared
+      //appointment details cleared
       else{
         updateLocalHourList(hourId,userRecord);
         updateAlertMsg("Appointment removed from ");
@@ -52,7 +53,7 @@ $(function () {
     displayRecord();
   }
 
-  //render events on work day schedule
+  //render event details on work day schedule
   function displayRecord() {
     checkLocalHourList();
 
