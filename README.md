@@ -17,7 +17,7 @@ Grey background indicates that the time block has already passed, red indicates 
 
 ## Installation
 
-* Open url link https://amethystlyre.github.io/Javascript-timed-quiz/ in above mention browser
+* Open url link https://amethystlyre.github.io/Work-Day-Scheduler/ in above mention browser
 
 ## Credits
 N/A
